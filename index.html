@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asisten Belajar Offline - Bahan Latihan P13 (SMA Mutiara Bangsa 2)</title>
+  <meta name="description" content="Aplikasi web Asisten Belajar cerdas yang berjalan 100% lokal offline di browser untuk kurikulum modul Bahan Latihan P13 SMA Mutiara Bangsa 2. Dilengkapi AI Chatbot, analisis multimedia dan dokumen, serta Generator Kuis 25 soal per modul tanpa reload.">
+  <link rel="stylesheet" href="index.css">
+  <!-- FontAwesome Icons for clean UI accents -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ====================================================================
+         LEFT SIDEBAR DASHBOARD: MODUL BAHAN LATIHAN P13
+         ==================================================================== -->
+    <aside class="sidebar" id="appSidebar">
+      <!-- Sidebar Header & Branding -->
+      <div class="sidebar-header">
+        <div class="brand-wrapper">
+          <div class="brand-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="brand-info">
+            <h1>Asisten Belajar AI</h1>
+            <div class="brand-subtitle">
+              <span>SMA Mutiara Bangsa 2</span>
+              <span class="offline-pill">
+                <span class="status-dot"></span> Offline
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Folder Source Indicator -->
+        <div class="folder-badge" title="Sumber Modul: Bahan Latihan P13 (Koleksi_Modul_P13)">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Folder: <strong>Bahan Latihan P13</strong></span>
+        </div>
+      </div>
+
+      <!-- Quick Search / Filter Modul -->
+      <div class="sidebar-search">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="moduleSearchInput" placeholder="Cari modul atau materi..." autocomplete="off">
+        </div>
+      </div>
+
+      <!-- Dynamic Module Navigation List -->
+      <div class="sidebar-modules-container" id="modulesListContainer">
+        <!-- Rendered dynamically by app.js:
+             - Semua Modul (Lintas Disiplin)
+             - Modul 01 Sejarah Indonesia
+             - Modul 02 Biologi
+             - Modul 03 Fisika
+             - Modul 04 Kimia
+             - Modul 05 Matematika Lanjut
+             - Modul 06 Sosiologi Terapan
+             - Modul 07 Geografi Fisik
+             - Modul 08 Ekonomi & Keuangan
+             - Modul 09 Informatika Lanjut
+             - Modul 10 Bahasa Indonesia
+        -->
+      </div>
+
+      <!-- Sidebar Footer Stats & System Info -->
+      <div class="sidebar-footer">
+        <div class="sidebar-actions">
+          <button class="btn-sidebar" id="btnShowWorkflow">
+            <i class="fa-solid fa-diagram-project"></i>
+            <span>Alur Kerja</span>
+          </button>
+          <button class="btn-sidebar" id="btnToggleTheme" title="Ganti Tema (Gelap / Terang)">
+            <i class="fa-solid fa-moon" id="themeIcon"></i>
+            <span id="themeText">Tema</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN APP CONTENT AREA
+         ==================================================================== -->
+    <main class="main-content">
+      
+      <!-- Top Application Header & Mode Switcher -->
+      <header class="main-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobileMenuToggle" title="Buka Menu Modul">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="active-module-indicator">
+            <div class="active-module-icon" id="headerModuleIcon">📜</div>
+            <div class="active-module-titles">
+              <h2 id="headerModuleTitle">Sejarah Indonesia</h2>
+              <p id="headerModuleCode">MOD-SEJ-11-01 • 35 Halaman • 25 Soal Kuis</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Navigation (AI Chatbot vs Generator Kuis vs Pembaca Modul vs Alur Kerja) -->
+        <nav class="mode-nav" aria-label="Mode Aplikasi">
+          <button class="mode-tab-btn active" id="tabChat" data-view="chatView">
+            <i class="fa-solid fa-robot"></i>
+            <span>AI Chatbot</span>
+          </button>
+          <button class="mode-tab-btn" id="tabQuiz" data-view="quizView">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <span>Generator Kuis</span>
+            <span class="mode-badge-count">25</span>
+          </button>
+          <button class="mode-tab-btn" id="tabReader" data-view="readerView">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Baca Modul</span>
+          </button>
+          <button class="mode-tab-btn" id="tabWorkflow" data-view="workflowView">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>Perumus Prompt</span>
+          </button>
+        </nav>
+
+        <div class="header-right">
+          <button class="btn-icon-header" id="btnAudioMute" title="Bicara / Text-to-Speech">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+          <button class="btn-icon-header" id="btnClearChat" title="Bersihkan Percakapan">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- ==================================================================
+           VIEW 1: AI Chatbot Assistant View
+           ================================================================== -->
+      <section class="view-container chat-view active" id="chatView">
+        <!-- Chat Message Log -->
+        <div class="chat-messages-area" id="chatMessagesArea">
+          <!-- Welcome Banner will be inserted dynamically here -->
+        </div>
+
+        <!-- Chat Input & Attachment Area -->
+        <div class="chat-input-container">
+          <!-- Staged Attachment Tray -->
+          <div class="staged-attachment-tray" id="stagedAttachmentTray">
+            <div class="staged-file-item">
+              <i class="fa-solid fa-file-circle-check staged-file-icon" id="stagedFileIcon"></i>
+              <div>
+                <div class="staged-file-name" id="stagedFileName">file_name.pdf</div>
+                <div class="staged-file-size" id="stagedFileSize">0 KB</div>
+              </div>
+            </div>
+            <button class="btn-remove-attachment" id="btnRemoveStagedFile" title="Hapus Lampiran">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Input Form -->
+          <form class="chat-input-form" id="chatInputForm" onsubmit="return false;">
+            <!-- Hidden File Input for all multimedia & document types -->
+            <input type="file" id="mediaFileInput" 
+                   accept="image/*,video/mp4,video/webm,audio/mp3,audio/wav,audio/ogg,.pdf,.docx,.txt,.json,.csv,.md" 
+                   style="display: none;">
+            
+            <!-- Attachment Button -->
+            <button type="button" class="btn-attach" id="btnAttachFile" title="Tambahkan Foto, Video, Audio, atau Dokumen (PNG, JPG, MP4, MP3, PDF, DOCX, dll)">
+              <i class="fa-solid fa-paperclip"></i>
+            </button>
+
+            <!-- Prompt Formulator Shortcut Button -->
+            <button type="button" class="btn-prompt-generator-shortcut" id="btnQuickFormulate" title="Rumuskan Prompt Mandiri Otomatis">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+
+            <!-- Text Query Input -->
+            <textarea id="chatTextInput" rows="1" placeholder="Ajukan pertanyaan materi atau lampirkan foto/video/audio/dokumen..." autocomplete="off"></textarea>
+
+            <!-- Send Button -->
+            <button type="submit" class="btn-send" id="btnSendMessage" title="Kirim Pesan">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 2: Generator Kuis Interaktif (15 PG, 5 TF, 5 Esai)
+           ================================================================== -->
+      <section class="view-container quiz-view" id="quizView">
+        <!-- Top Quiz Sticky Control Bar -->
+        <div class="quiz-control-bar">
+          <div class="quiz-title-badge">
+            <div class="quiz-badge-icon" id="quizModuleBadgeIcon">📝</div>
+            <div>
+              <h3 id="quizModuleTitle">Generator Kuis Interaktif</h3>
+              <p id="quizModuleSubtitle">15 Pilihan Ganda • 5 True/False • 5 Esai Mandiri (Total 25 Soal)</p>
+            </div>
+          </div>
+
+          <!-- Live Scoreboard -->
+          <div class="live-score-card">
+            <div class="score-metric">
+              <div class="metric-val" id="scoreTotalVal">0 / 100</div>
+              <div class="metric-label">Skor Akhir</div>
+            </div>
+            <div class="score-metric">
+              <div class="metric-val" id="scorePgVal">0/15</div>
+              <div class="metric-label">Pil. Ganda</div>
+            </div>
+            <div class="score-metric">
+              <div class="metric-val" id="scoreTfVal">0/5</div>
+              <div class="metric-label">True / False</div>
+            </div>
+            <div class="score-metric">
+              <div class="metric-val" id="scoreEssayVal">0/5</div>
+              <div class="metric-label">Esai Dinilai</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="quiz-buttons-group">
+            <button class="btn-quiz-primary" id="btnCalculateScore">
+              <i class="fa-solid fa-calculator"></i>
+              <span>Hitung Skor</span>
+            </button>
+            <button class="btn-quiz-outline" id="btnToggleAllAnswers">
+              <i class="fa-solid fa-key"></i>
+              <span id="btnToggleAnswersText">Lihat Kunci & Pembahasan</span>
+            </button>
+            <button class="btn-quiz-outline" id="btnResetQuiz" title="Ulangi Kuis">
+              <i class="fa-solid fa-rotate-right"></i>
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Sub-Tabs inside Quiz -->
+        <div class="quiz-filter-tabs">
+          <button class="quiz-filter-btn active" data-filter="all">Semua Soal (25)</button>
+          <button class="quiz-filter-btn" data-filter="pg">Pilihan Ganda (15)</button>
+          <button class="quiz-filter-btn" data-filter="tf">True / False (5)</button>
+          <button class="quiz-filter-btn" data-filter="essay">Esai Mandiri (5)</button>
+        </div>
+
+        <!-- Questions Scroll Area -->
+        <div class="quiz-questions-scroll" id="quizQuestionsContainer">
+          <!-- Rendered dynamically by app.js: 15 PG + 5 TF + 5 Essay -->
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 3: Modul Reader & Ringkasan Pengetahuan
+           ================================================================== -->
+      <section class="view-container reader-view" id="readerView">
+        <aside class="reader-toc-sidebar" id="readerTocSidebar">
+          <div class="sidebar-section-title">Daftar Bab Materi</div>
+          <div id="readerChaptersList">
+            <!-- Rendered dynamically -->
+          </div>
+        </aside>
+        <div class="reader-content-scroll" id="readerContentScroll">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 4: Alur Kerja Sistem & Perumus Prompt Mandiri
+           ================================================================== -->
+      <section class="view-container workflow-view" id="workflowView">
+        <div class="workflow-hero">
+          <h2>Alur Kerja Sistem & Perumus Prompt Mandiri</h2>
+          <p>
+            Aplikasi Asisten Belajar ini dirancang beroperasi 100% lokal offline tanpa ketergantungan koneksi internet. 
+            Materi diekstrak secara utuh dari direktori <strong>Bahan Latihan P13 (Koleksi_Modul_P13)</strong>, 
+            diindeks menggunakan representasi semantik lokal, dan disajikan melalui penalaran kontekstual mandiri tanpa kalimat template.
+          </p>
+        </div>
+
+        <!-- 5-Step Pipeline Cards -->
+        <div class="pipeline-steps-grid">
+          <div class="pipeline-card">
+            <div class="pipeline-step-badge">1</div>
+            <h4>Pemuatan Bahan Latihan P13</h4>
+            <p>
+              10 Modul pembelajaran resmi SMA Mutiara Bangsa 2 dimuat secara lokal. Setiap modul memuat 7 bab kurikulum lengkap beserta metadata silabus.
+            </p>
+          </div>
+          <div class="pipeline-card">
+            <div class="pipeline-step-badge">2</div>
+            <h4>Pengindeksan Vektor Semantik</h4>
+            <p>
+              Teks modul dipecah menjadi unit-unit pengetahuan berbobot istilah (TF-IDF & BM25), siap dicari secara instan dalam hitungan milidetik.
+            </p>
+          </div>
+          <div class="pipeline-card">
+            <div class="pipeline-step-badge">3</div>
+            <h4>Dekonstruksi Multimedia & File</h4>
+            <p>
+              Ketika pengguna mengunggah foto, video MP4, rekaman audio MP3, atau dokumen PDF/DOCX, sistem menganalisis isi dan metadata file secara lokal.
+            </p>
+          </div>
+          <div class="pipeline-card">
+            <div class="pipeline-step-badge">4</div>
+            <h4>Penalaran & Kutipan Presisi</h4>
+            <p>
+              Mesin asisten merumuskan penjelasan mendalam secara mandiri, lengkap dengan rujukan sitasi Bab dan Halaman resmi buku modul.
+            </p>
+          </div>
+          <div class="pipeline-card">
+            <div class="pipeline-step-badge">5</div>
+            <h4>Evaluasi Kuis Real-Time</h4>
+            <p>
+              Bank soal 25 item (15 PG, 5 T/F, 5 Esai) dievaluasi otomatis tanpa reload halaman, menyajikan skor, kunci jawaban, dan rubrik pembahasan.
+            </p>
+          </div>
+        </div>
+
+        <!-- Interactive Autonomous Prompt Formulator Sandbox -->
+        <div class="prompt-engineer-sandbox">
+          <div class="sandbox-header">
+            <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--color-warning);"></i> Perumus Prompt Mandiri (Autonomous Inquiry Formulator)</h3>
+            <p>Ketikkan topik atau kata kunci materi apa saja, sistem akan merumuskan pertanyaan analitis bertingkat secara mandiri tanpa template kaku:</p>
+          </div>
+          
+          <div class="generator-input-row">
+            <input type="text" id="promptKeywordInput" placeholder="Contoh: Rengasdengklok, Enzim Pepsin, Hukum Newton, Termokimia, Limit Aljabar..." value="Peristiwa Rengasdengklok">
+            <button class="btn-generate-prompts" id="btnFormulatePrompts">
+              <i class="fa-solid fa-bolt"></i> Rumuskan Prompt
+            </button>
+          </div>
+
+          <div class="generated-prompts-results" id="generatedPromptsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ====================================================================
+       MODALS & OVERLAYS
+       ==================================================================== -->
+  <!-- Document Viewer / Reader Modal -->
+  <div class="modal-overlay" id="docViewerModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="docModalTitle">Pratinjau Isi Dokumen</h3>
+        <button class="btn-close-modal" id="btnCloseDocModal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="docModalContent">
+        <!-- Document text will be shown here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div class="modal-overlay" id="imageLightboxModal">
+    <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+      <button class="btn-close-modal" id="btnCloseLightbox" style="position: absolute; top: -40px; right: 0; color: #fff; font-size: 1.8rem;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img id="lightboxImage" src="" alt="Pratinjau Gambar" style="max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Data Script (Compiled 10 Modules with 250 Questions) -->
+  <script src="modules_data.js"></script>
+  <!-- Application Controller -->
+  <script src="app.js"></script>
+</body>
+</html>
